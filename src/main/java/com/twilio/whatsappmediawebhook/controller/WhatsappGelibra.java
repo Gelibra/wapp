@@ -20,7 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-
+import org.springframework.http.MediaType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,7 +28,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.util.HashMap;
+import org.json.JSONObject;
+import org.springframework.http.HttpHeaders;
 import java.net.URISyntaxException;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.http.HttpEntity;
 
 
 @RestController
@@ -46,6 +52,12 @@ public class WhatsappGelibra {
     @Value("${donateUrl}")
     private String donateUrl;
 
+    @Value("${libraAPI}")
+    private String libraAPI;
+
+    @Value("${association}")
+    private String association;
+
     @Value("${goodBoyUrl}")
     private String goodBoyUrl;
 
@@ -61,7 +73,7 @@ public class WhatsappGelibra {
             HttpServletResponse response,
             HttpServletRequest request
     ) throws MimeTypeException, ServletException, IOException, URISyntaxException {
-
+        var sender = request.getParameter("From");
         var body = request.getParameter("Body");
 
         var twimlResponse = new MessagingResponse.Builder();
@@ -96,7 +108,7 @@ public class WhatsappGelibra {
                         new Message.Builder()
                                 .body(new Body.Builder("How much would you like to donate to Tsunami victims in Madagascar").build()).build());
             } else if (Integer.parseInt(body) >= 0) {
-                handleDonation(Integer.valueOf(body));
+                handleDonation(sender, Integer.valueOf(body));
                 twimlResponse.message(
                         new Message.Builder()
                                 .body(new Body.Builder("Thank you for your donation of " + body + " Libra").build()).build());
@@ -126,8 +138,21 @@ public class WhatsappGelibra {
         FileUtils.copyInputStreamToFile(source, file);
     }
 
-    private String handleDonation(Integer amount) {
-        return restTemplate.getForObject("http://localhost:3000/transfer?amount=" + amount, String.class);
+    private String handleDonation(String sender, Integer amount) {
+
+        System.out.println(sender);
+        System.out.println(amount);
+        System.out.println(association);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject personJsonObject = new JSONObject();
+        personJsonObject.put("amount", String.valueOf(amount));
+        personJsonObject.put("receiver", association);
+        personJsonObject.put("number", sender.split(":")[1]);
+        HttpEntity<String> request = new HttpEntity<String>(personJsonObject.toString(), headers);
+
+        return restTemplate.postForObject(libraAPI + "/transaction", request, String.class);
     }
 
 }

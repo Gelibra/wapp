@@ -104,11 +104,6 @@ public class WhatsappGelibra {
             }
         }
 
-        //TODO handle ammount
-//        if (body.contains("10")) {
-        //          handleDonation(Integer.valueOf(body));
-        //    }
-
         response.setContentType("text/xml");
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
@@ -50,45 +51,62 @@ public class WhatsappGelibra {
         return "greeting";
     }
 
-    @PostMapping(consumes = "application/json", value = "/")
-    public void getMedia(@RequestBody TwilioMessage twilioMessage,
-                         @RequestParam(name = "MediaUrl") String mediaUrl,
-                         @RequestParam(name = "MediaContentType") String contentType,
-                         HttpServletResponse response
+    @PostMapping(consumes = "application/x-www-form-urlencoded;charset=UTF-8", value = "/")
+    public void getMedia(
+
+                         HttpServletResponse response,
+                         HttpServletRequest request
     ) throws MimeTypeException, ServletException, IOException, URISyntaxException {
 
-        Integer numMedia = twilioMessage.getNumMedia();
 
-        var fileName = mediaUrl.substring(mediaUrl.lastIndexOf("/") + 1);
-        var fileExtension = MimeTypes.getDefaultMimeTypes().forName(contentType).getExtension();
-        var file = new File(fileName + fileExtension);
-
-        // Download file
-        downloadFile(mediaUrl, file);
-
+        var newMedia = request.getParameter("newMedia");
+        var body = request.getParameter("Body");
 
         var twimlResponse = new MessagingResponse.Builder();
 
-        if (numMedia > 0) {
-            twimlResponse.message(
-                    new Message.Builder()
-                            .body(new Body.Builder("Thanks for the Libra(s)!").build())
-                            .media(new Media.Builder(goodBoyUrl).build())
-                            .build()
-            );
-        } else {
-            twimlResponse.message(
-                    new Message.Builder()
-                            .body(new Body.Builder("Please send us a libra!").build())
-                            .media(new Media.Builder(donateUrl).build())
-                            .build()
-            );
-        }
+            System.out.println("body :" + body);
+
+            if (body!=null && !body.isEmpty()) {
+                if (body.contains("donation")) {
+                    twimlResponse.message(new Message.Builder()
+                            .body(new Body.Builder("Hello. I m Sam. Great to meet you. I need your help to save people. I m currently saving refugees in Syria and helping victims of Tsunami in Madagascar")
+                                    .build())
+                            .build());
+                    twimlResponse.message(new Message.Builder()
+                            .body(new Body.Builder("Refugees in Syria.\nWould you like to help?").build()).build());
+                            //.media(new Media.Builder(Phillipines).build()).build());
+                    twimlResponse.message(
+                            new Message.Builder()
+                                    .body(new Body.Builder("Tsunami victoms in the Madagascar\nWould you like to help ?").build()).build());
+                               //     .media(new Media.Builder(Phillipines).build()).build());
+                }else if (body.contains("yes") || body.contains("Yes"))
+                {
+                    twimlResponse.message(
+                            new Message.Builder()
+                                    .body(new Body.Builder("Great! Happy to hear. Which cause would you like to support?\nA. Syriam refugees.\nB. Tsunami victims in Magadascar").build())
+                           .build());
+                } else if (body.contains("A")) {
+                    twimlResponse.message(
+                            new Message.Builder()
+                                    .body(new Body.Builder("How much would you like to donate to Syrian refugees").build()).build());
+                } else if (body.contains("B")) {
+                    twimlResponse.message(
+                            new Message.Builder()
+                                    .body(new Body.Builder("How much would you like to donate to Tsunami victims in Madagascar").build()).build());
+                } else if (Integer.parseInt(body)>=0)
+                {
+                    handleDonation(Integer.valueOf(body));
+                    twimlResponse.message(
+                            new Message.Builder()
+                                    .body(new Body.Builder("Thank you for your donation of "+body+ " Libra").build()).build());
+                    // payment
+                }
+            }
 
         //TODO handle ammount
-        if (twilioMessage.getBody().contains("donation")) {
-            handleDonation(Integer.valueOf(twilioMessage.getBody()));
-        }
+//        if (body.contains("10")) {
+  //          handleDonation(Integer.valueOf(body));
+    //    }
 
         response.setContentType("text/xml");
         response.setCharacterEncoding("UTF-8");
@@ -112,8 +130,8 @@ public class WhatsappGelibra {
         FileUtils.copyInputStreamToFile(source, file);
     }
 
-    private ResponseEntity handleDonation(Integer amount){
-       return restTemplate.getForObject("http://localhost:3000/transfer?amount="+amount, ResponseEntity.class);
+    private String handleDonation(Integer amount){
+       return restTemplate.getForObject("http://localhost:3000/transfer?amount="+amount, String.class);
     }
 
 }

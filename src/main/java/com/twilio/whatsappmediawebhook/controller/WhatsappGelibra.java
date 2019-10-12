@@ -82,7 +82,13 @@ public class WhatsappGelibra {
 
 
         if (body != null && !body.isEmpty()) {
-            if (body.contains("donation")) {
+            if(body.contains("create")) {
+                handleCreation(sender);
+                twimlResponse.message(
+                        new Message.Builder()
+                                .body(new Body.Builder("Your account has been created!").build()).build());
+            }
+            else if (body.contains("donation")) {
                 twimlResponse.message(new Message.Builder()
                         .body(new Body.Builder("Hello. I m Sam. Great to meet you. I need your help to save people. I m currently saving refugees in Syria and helping victims of Tsunami in Madagascar")
                                 .build())
@@ -113,6 +119,10 @@ public class WhatsappGelibra {
                         new Message.Builder()
                                 .body(new Body.Builder("Thank you for your donation of " + body + " Libra").build()).build());
                 // payment
+            } else {
+                twimlResponse.message(
+                        new Message.Builder()
+                                .body(new Body.Builder("I didn't understand, sorry!").build()).build());
             }
         }
 
@@ -153,6 +163,16 @@ public class WhatsappGelibra {
         HttpEntity<String> request = new HttpEntity<String>(personJsonObject.toString(), headers);
 
         return restTemplate.postForObject(libraAPI + "/transaction", request, String.class);
+    }
+
+    private String handleCreation(String number) {
+        System.out.println(number.split(":")[1]);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        JSONObject personJsonObject = new JSONObject();
+        personJsonObject.put("number", String.valueOf(number.split(":")[1]));
+        HttpEntity<String> request = new HttpEntity<String>(personJsonObject.toString(), headers);
+        return restTemplate.postForObject(libraAPI + "/account/create", request, String.class);
     }
 
 }

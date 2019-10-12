@@ -35,8 +35,9 @@ import java.net.URISyntaxException;
 public class WhatsappGelibra {
 
     Logger logger = LoggerFactory.getLogger(WhatsappGelibra.class);
-    private static String Syria = "https://villagegreennj.com/wp-content/uploads/2018/01/m27740143_donate_woman_hugging.jpg";
-    private static String Phillipines = "https://c8.alamy.com/comp/D36MEN/port-au-prince-haiti-hatian-red-cross-volunteers-at-a-hilfsgueterverteilung-D36MEN.jpg";
+    private static String Syria = "https://github.com/Gelibra/wapp/raw/feature/springboot/src/main/resources/Refugees.jpg";
+    private static String Phillipines = "https://github.com/Gelibra/wapp/raw/feature/springboot/src/main/resources/Tsunami2.jpg";
+
 
 
     @Autowired
@@ -76,7 +77,7 @@ public class WhatsappGelibra {
                         .build());
                 twimlResponse.message(new Message.Builder()
                         .body(new Body.Builder("Refugees in Syria.\nWould you like to help?").build())
-                .media(new Media.Builder(Phillipines).build()).build());
+                .media(new Media.Builder(Syria).build()).build());
                 twimlResponse.message(
                         new Message.Builder()
                                 .body(new Body.Builder("Tsunami victims in the Madagascar\nWould you like to help ?").build())

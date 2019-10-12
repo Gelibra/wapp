@@ -14,9 +14,12 @@ import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -32,20 +35,22 @@ public class WhatsappGelibra {
 
     Logger logger = LoggerFactory.getLogger(WhatsappGelibra.class);
 
+    @Autowired
+    RestTemplate restTemplate;
 
-    @Value("${donateUrl:https://villagegreennj.com/wp-content/uploads/2018/01/m27740143_donate_woman_hugging.jpg\"}")
+    @Value("${donateUrl}")
     private String donateUrl;
 
-    @Value("${goodBoyUrl:https://c8.alamy.com/comp/D36MEN/port-au-prince-haiti-hatian-red-cross-volunteers-at-a-hilfsgueterverteilung-D36MEN.jpg}")
+    @Value("${goodBoyUrl}")
     private String goodBoyUrl;
 
-    @RequestMapping("/")
+    @RequestMapping("/greeting")
     public String greeting(@RequestParam(name = "name", required = false, defaultValue = "World") String name, Model model) {
         model.addAttribute("name", name);
         return "greeting";
     }
 
-    @PostMapping(consumes = "application/json", value = "/media")
+    @PostMapping(consumes = "application/json", value = "/")
     public void getMedia(@RequestBody TwilioMessage twilioMessage,
                          @RequestParam(name = "MediaUrl") String mediaUrl,
                          @RequestParam(name = "MediaContentType") String contentType,
@@ -80,6 +85,11 @@ public class WhatsappGelibra {
             );
         }
 
+        //TODO handle ammount
+        if (twilioMessage.getBody().contains("donation")) {
+            handleDonation(Integer.valueOf(twilioMessage.getBody()));
+        }
+
         response.setContentType("text/xml");
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
@@ -100,6 +110,10 @@ public class WhatsappGelibra {
         var downloadResp = httpclient.execute(get);
         var source = downloadResp.getEntity().getContent();
         FileUtils.copyInputStreamToFile(source, file);
+    }
+
+    private ResponseEntity handleDonation(Integer amount){
+       return restTemplate.getForObject("http://localhost:3000/transfer?amount="+amount, ResponseEntity.class);
     }
 
 }

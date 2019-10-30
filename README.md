@@ -8,7 +8,7 @@
 
 To run the app locally:
 
-1. Clone this repository and open the solution in Visual Studio Code.
+1. Clone this repository and open the solution in your preferred IDE.
 
    ```bash
    git clone git@github.com:Gelibra/wapp.git
@@ -18,11 +18,8 @@ To run the app locally:
 1. Run the web app.
 use java 11
    ```bash
-   mvn dependency:copy-dependencies
-   then move content into src/main/webapp/WEB-INF/lib
-   cp -r target/dependency src/main/webapp/WEB-INF/lib
-   mvn jetty:run
-   ```
+   mvn clean package
+   java -jar  whatsappmediawebhook-0.0.1-SNAPSHOT.jar```
 
 1. Launch ngrok http -host-header=localhost 8080
 this should give you something like http://01183580.ngrok.io

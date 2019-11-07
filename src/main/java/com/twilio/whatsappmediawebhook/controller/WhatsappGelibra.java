@@ -5,18 +5,15 @@ import com.twilio.twiml.MessagingResponse;
 import com.twilio.twiml.messaging.Body;
 import com.twilio.twiml.messaging.Media;
 import com.twilio.twiml.messaging.Message;
-import com.twilio.whatsappmediawebhook.json.TwilioMessage;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.tika.mime.MimeTypeException;
-import org.apache.tika.mime.MimeTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -48,6 +45,15 @@ public class WhatsappGelibra {
 
     @Value("${goodBoyUrl}")
     private String goodBoyUrl;
+
+    @Value("${api.libra.endpoint}")
+    private String apiLibraURL;
+
+
+    @GetMapping("/")
+    public String welcome(){
+        return "Save the world!";
+    }
 
     @RequestMapping("/greeting")
     public String greeting(@RequestParam(name = "name", required = false, defaultValue = "World") String name, Model model) {
@@ -127,7 +133,7 @@ public class WhatsappGelibra {
     }
 
     private String handleDonation(Integer amount) {
-        return restTemplate.getForObject("http://localhost:3000/transfer?amount=" + amount, String.class);
+        return restTemplate.getForObject(apiLibraURL + amount, String.class);
     }
 
 }

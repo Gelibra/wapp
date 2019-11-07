@@ -21,6 +21,8 @@ use java 11
    mvn clean package
    java -jar  whatsappmediawebhook-0.0.1-SNAPSHOT.jar```
 
+1. Swagger api available at : http://localhost:8080/swagger-ui.html
+   
 1. Launch ngrok http -host-header=localhost 8080
 this should give you something like http://01183580.ngrok.io
 

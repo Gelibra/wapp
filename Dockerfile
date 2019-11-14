@@ -14,7 +14,7 @@ COPY target/$GELIBRA_APP /opt/
 #api libra
 COPY api-libra /opt/
 WORKDIR opt/api-libra/
-RUN npm install
+RUN npm install && npm rebuild
 
 EXPOSE 8080
 EXPOSE 3000
